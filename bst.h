@@ -252,8 +252,13 @@ protected:
 
     // Add helper functions here
 
+<<<<<<< HEAD
     int calcDepth(Node<Key,Value>* current_) const;
     void clearWithArg(Node<Key,Value>* current_);
+=======
+    int findDepth(Node<Key,Value>* root);
+    bool checkBalance(Node<Key,Value>* Node_);
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
 
 
 protected:
@@ -523,8 +528,15 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
 {
     // TODO
     //create a node to insert.
+<<<<<<< HEAD
     if(root_ == NULL){
         root_ = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);
+=======
+    Node<Key, Value>* insertNode = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);  
+
+    if(root_ == NULL){
+        root_ = insertNode;
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
         return;
     }
     else{
@@ -537,7 +549,12 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
             foundParent = currChild;
             if(workingKey == foundParent->getKey()){
                 //update value
+<<<<<<< HEAD
                 foundParent->setValue(keyValuePair.second);
+=======
+                foundParent->setValue(insertNode->getValue());
+                delete insertNode;
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
                 return;
             }
             else if(workingKey < foundParent->getKey()){
@@ -548,7 +565,11 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
             }
         }
     //now insert under the foundParent
+<<<<<<< HEAD
         Node<Key, Value>* insertNode = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);   
+=======
+        
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
         if(workingKey > foundParent->getKey()){
             insertNode->setParent(foundParent);
             foundParent->setRight(insertNode);
@@ -607,6 +628,10 @@ void BinarySearchTree<Key, Value>::remove(const Key& key)
         if(delNode->getRight() != NULL && delNode->getLeft() != NULL){
             Node<Key,Value>* predecessorNode = predecessor(delNode);
             nodeSwap(delNode, predecessorNode); //swap positions
+<<<<<<< HEAD
+=======
+            delNode = predecessorNode; //fix pointers
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
         }
 
         if(delNode->getRight() != NULL || delNode->getLeft() != NULL){
@@ -673,9 +698,12 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
         If the left subtree does not exist
             walk up parents until you find a node that is the right child to it's parent, the parent is the predecessor
     */
+<<<<<<< HEAD
     if (current == NULL) {
         return NULL;
     }
+=======
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
     Node<Key, Value>* parent = current->getParent();
     if(current->getLeft() != NULL){
         current = current->getLeft();
@@ -700,9 +728,15 @@ template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear()
 {
     // TODO
+<<<<<<< HEAD
     clearWithArg(root_);
     root_ = NULL;
     return;
+=======
+    while(root_ != NULL){
+        remove(root_->getKey());
+    }
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
 }
 
 template<typename Key, typename Value>
@@ -735,9 +769,12 @@ BinarySearchTree<Key, Value>::getSmallestNode() const
         - This must be the smallest value, and also the "left-most" leaf
     */
    Node<Key, Value>* current_ = root_;
+<<<<<<< HEAD
     if (current_ == NULL){
       return NULL;
     }
+=======
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
    while(current_->getLeft() != NULL){
     current_ = current_->getLeft();
    }
@@ -797,6 +834,7 @@ bool BinarySearchTree<Key, Value>::isBalanced() const
             - In this way, 
             - If balance > -1, left height > right height, tree at node is left-heavy
             - If balance > 1, right height > left height, tree at node is roght-heavy
+<<<<<<< HEAD
 
             Implementation
             Recurse down to all leaf nodes, and at each recursive call, call helper to check the heights of subtrees. 
@@ -810,6 +848,12 @@ bool BinarySearchTree<Key, Value>::isBalanced() const
       return false;
     }
     return true;
+=======
+    */
+       // Add your code below
+
+    
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
 }
 
 
@@ -936,8 +980,96 @@ void BinarySearchTree<Key, Value>::nodeSwap( Node<Key,Value>* n1, Node<Key,Value
 
 }
 
+<<<<<<< HEAD
 
 
+=======
+// template<typename Key, typename Value>
+// bool BinarySearchTree<Key,Value>::checkBalance(Node<Key,Value>* Node_){
+//     /*
+//     here's maybe how i'd do it. In my main function, i'll first go ahead and call my helper function.
+//          This helper function would take an argument of a pointer to a node. 
+//          The helper function would internally would recurse and evaluate at each node and subtree and eventually return an int depth of the subtree with left or right child as the root/arg
+//     I would call the helper function twice, one for the left child of the root and the other for the right child of the root. Return depth of the main function where i would then assign the return values to two variabls to compare. 
+//     If the variables ==, 
+//         then return true, 
+//         if not, false
+//     */
+
+//     //trivially true if no tree
+//     if(Node_ == NULL){
+//         return true;
+//     }
+
+//     else if(Node_->getLeft() == NULL && Node_->getRight() == NULL){
+//         return true;
+//     }
+
+    
+
+//     int leftTree = 0;
+//     int rightTree = 0;
+
+
+
+//     //else if both exist, check the depths of both subtrees and compare depths
+//     leftTree = findDepth(Node_->getLeft());
+//     rightTree = findDepth(Node_->getRight());
+
+//     //compare the depths at right and left, return bool
+//     if(abs(rightTree-leftTree) <= 1){
+//         return true;
+//     }
+//     return false;
+//  }
+
+// template<typename Key, typename Value>
+// int BinarySearchTree<Key,Value>::findDepth(Node<Key,Value>* Node){
+//     int rightSubtree = 0;
+//     int leftSubtree = 0;
+
+
+//     //if no children at root (null), then return depth + 1 (meaning one node depth which is the root node itself)
+//     if(Node->getLeft() == NULL && Node->getRight() == NULL){
+//         return 1;
+//     }
+
+//     //else if children exist, recurse downward
+//     else{
+//         if(Node->getLeft() != NULL){
+//             leftSubtree = findDepth(Node->getLeft());
+//         }
+//         if(Node->getRight() != NULL){
+//             rightSubtree = findDepth(Node->getRight());
+//         }
+
+
+//     }   
+
+//     //while traversing from either right or left, if we detect a mismatch in depth early in a sub tree
+//     if(rightSubtree == -1 || leftSubtree == -1){
+//         return -1;
+//     }
+
+//     //traversing up one child
+//     if(rightSubtree == 0 && leftSubtree != 0){
+//         return leftSubtree+1;
+//     }
+//     if(rightSubtree != 0 && leftSubtree == 0){
+//         return rightSubtree+1;
+//     }
+    
+
+//     //traversing back up from both children
+//     if(rightSubtree == leftSubtree){
+//         return leftSubtree+1;
+//     }
+
+
+//     return -1;
+// }
+
+>>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
 /**
  * Lastly, we are providing you with a print function,
    BinarySearchTree::printRoot().
