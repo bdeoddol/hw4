@@ -70,6 +70,8 @@ template<typename Key, typename Value>
 Node<Key, Value>::~Node()
 {
 
+
+
 }
 
 /**
@@ -248,6 +250,9 @@ protected:
 
     // Add helper functions here
 
+    int findDepth(Node<Key,Value>* root);
+    bool checkBalance(Node<Key,Value>* Node_)
+
 
 protected:
     Node<Key, Value>* root_;
@@ -267,6 +272,8 @@ template<class Key, class Value>
 BinarySearchTree<Key, Value>::iterator::iterator(Node<Key,Value> *ptr)
 {
     // TODO
+    current_ = ptr;
+    
 }
 
 /**
@@ -276,7 +283,8 @@ template<class Key, class Value>
 BinarySearchTree<Key, Value>::iterator::iterator() 
 {
     // TODO
-
+    current_ = NULL;
+  
 }
 
 /**
@@ -309,6 +317,7 @@ BinarySearchTree<Key, Value>::iterator::operator==(
     const BinarySearchTree<Key, Value>::iterator& rhs) const
 {
     // TODO
+    return current_ == rhs.current_;
 }
 
 /**
@@ -321,6 +330,7 @@ BinarySearchTree<Key, Value>::iterator::operator!=(
     const BinarySearchTree<Key, Value>::iterator& rhs) const
 {
     // TODO
+    return current_ != rhs.current_;
 
 }
 
@@ -333,7 +343,57 @@ typename BinarySearchTree<Key, Value>::iterator&
 BinarySearchTree<Key, Value>::iterator::operator++()
 {
     // TODO
+    /*
+    In-order processing describes, traversing left node, root, then right node
+    always go from the root in counterclockwise direction around the tree. 
 
+    Inorder, left, node, then right (visit literally in order)
+    Pre order, left, right, node (down up tree)
+    Post order, node, left right (top down tree)
+
+    In this function, we are incrementing forward and thus we are looking for the SUCCESSOR 
+    to the current node.
+
+    BST are for ordered nodes, imagine we spread out bst into a line of subsequent nodes
+        In this visualization, we are spreading out the branches of each node 
+            the left spread to the left, right spread to the right.
+
+          8
+         / \
+        3   10
+       /\    \
+      1  6    14
+        / \   /\
+       4   7 13 20
+                /
+               18
+    Spreads out into 
+    1-3-(4-6-7)-8-10-(13-14)
+
+        The sucessor is defined to be the left most node in a right subtree. 
+    If the right subtree does not exist,
+    traverse upward thru parents until we find the first node that is a left child to a 
+    parent. The parent of left child is the sucessor.
+    
+
+    */
+
+    if(current_->getRight() != NULL){
+        current_ = current_->getRight();
+        //find left most node in current right subtree
+        while( current_->getLeft() != NULL){
+            current_ = current_->getLeft();
+        }
+    }
+    else{
+        Node<Key, Value>* parent  = current_->getParent();
+        while((parent != NULL) &&  current_ == parent->getRight() ){
+            current_ = parent;
+            parent = parent->getParent();
+        }
+        current_ = parent;
+    }
+    return *this;
 }
 
 
@@ -356,13 +416,28 @@ template<class Key, class Value>
 BinarySearchTree<Key, Value>::BinarySearchTree() 
 {
     // TODO
+    root_ = NULL;
 }
 
 template<typename Key, typename Value>
 BinarySearchTree<Key, Value>::~BinarySearchTree()
 {
     // TODO
+    /* 
+    We should deallocate nodes from the bottom up.
+    dealloc right or left child if they exist before deleting the parent
+        This is pre-order traversal (children then parents, bottom-up traversal)
 
+    To do this, I should probably make a recursive helper function that recurses downward
+    Then as we go up the tree, do our dealloc operations there
+    this is the clear function already protoyped
+
+
+    */
+
+
+
+    
 }
 
 /**
@@ -445,6 +520,47 @@ template<class Key, class Value>
 void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &keyValuePair)
 {
     // TODO
+    //create a node to insert.
+    Node<Key, Value>* insertNode = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);  
+
+    if(root_ == NULL){
+        root_ = insertNode;
+        return;
+    }
+    else{
+    //traverse the tree until we find the right parent to insert under.
+        Node<Key,Value>* foundParent = root_;
+        Node<Key, Value>* currChild = root_;
+        Key workingKey = keyValuePair.first;
+
+        while(currChild != NULL){
+            foundParent = currChild;
+            if(workingKey == foundParent->getKey()){
+                //update value
+                foundParent->setValue(insertNode->getValue());
+                delete insertNode;
+                return;
+            }
+            else if(workingKey < foundParent->getKey()){
+                currChild = foundParent->getLeft();
+            }
+            else if(workingKey > foundParent->getKey()){
+                currChild = foundParent->getRight();
+            }
+        }
+    //now insert under the foundParent
+        
+        if(workingKey > foundParent->getKey()){
+            insertNode->setParent(foundParent);
+            foundParent->setRight(insertNode);
+        }
+        else{
+            insertNode->setParent(foundParent);
+            foundParent->setLeft(insertNode);
+        }
+    }
+
+ return;
 }
 
 
@@ -457,6 +573,94 @@ template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::remove(const Key& key)
 {
     // TODO
+    Node<Key, Value>* delNode = root_;
+
+    if(root_ == NULL){
+        //nothing to be deleted
+        return;
+    }
+
+    else{
+        while(delNode != NULL && key != delNode->getKey()){
+            //only exit loop if we've hit the bottom of the tree or if we've found the node
+            if(key < delNode->getKey()){
+                delNode = delNode->getLeft();
+            }
+            else if(key > delNode->getKey()){
+                delNode = delNode->getRight();
+            }
+        }
+
+    }
+    //traverse nodes to find the correct key
+
+    
+    if(delNode != NULL){
+        Node<Key, Value>* parentdelNode = NULL;
+        Node<Key, Value>* childdelNode = NULL;
+        //if delNode isn't NULL, implies we broke out the loop bc we found the right node
+        /*
+        now that i've done, the traversal, if delNode isn't a nullptr, it must mean that delNode points to a valid Node. Now we need to find out how many children exist to do the right operations. 
+            If both children exist, we need to swap with the predecessor and so on. 
+            If one of them exist, then we need to find out which of them exists and swap with them. 
+            If neither exist, delete
+        */
+        if(delNode->getRight() != NULL && delNode->getLeft() != NULL){
+            Node<Key,Value>* predecessorNode = predecessor(delNode);
+            nodeSwap(delNode, predecessorNode); //swap positions
+            delNode = predecessorNode; //fix pointers
+        }
+
+        if(delNode->getRight() != NULL || delNode->getLeft() != NULL){
+            //after swapping with the predecessor, it's guaranteed that the delNode will have 0 or 1 child
+            //find which node exists under delNode
+            if(delNode->getRight() != NULL){
+                childdelNode = delNode->getRight();
+            }
+            else if(delNode->getLeft() != NULL){
+                childdelNode = delNode->getLeft();
+            }
+
+            //prepare to perform delNode and delNode pointer swapping
+            parentdelNode = delNode->getParent();
+            childdelNode->setParent(parentdelNode);
+
+            //if parent is null, delNode must be a root, it's child is therefore the new root
+            if(parentdelNode == NULL) {
+                root_ = childdelNode;
+            }
+            else if(parentdelNode->getRight() == delNode){
+                //if delNode is a right child of it's parent, replace it with it's child 
+                parentdelNode->setRight(childdelNode);
+            }
+            else if(parentdelNode->getLeft() == delNode){
+                //if delNode is a left child of it's parent, replace it with it's child
+                parentdelNode->setLeft(childdelNode);
+
+            }   
+
+        }      
+        else{
+            //leaf case, handle setting parent of del node to null
+            parentdelNode = delNode->getParent();
+            if(parentdelNode == NULL){
+                root_ = NULL;
+            }
+            else if(parentdelNode->getLeft() == delNode){
+                parentdelNode->setLeft(NULL);
+            }
+            else{
+                parentdelNode->setRight(NULL);
+            }
+          
+        }  
+        
+    }
+
+
+    //delete, if the to be deleted node does not have any children, it's safe to delete and skip above if-condition block
+    delete delNode;
+    return;
 }
 
 
@@ -466,6 +670,24 @@ Node<Key, Value>*
 BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
 {
     // TODO
+    /*
+    The predecessor at a given node is the right most node in the left subtree
+        If the left subtree does not exist
+            walk up parents until you find a node that is the right child to it's parent, the parent is the predecessor
+    */
+    Node<Key, Value>* parent = current->getParent();
+    if(current->getLeft() != NULL){
+        current = current->getLeft();
+        while(current->getRight() != NULL){
+            current = current->getRight();
+        }
+        return current;
+    }
+    while((parent != NULL) && (current == parent->getLeft())){
+        current = parent;
+        parent = parent->getParent();
+    }
+        return parent;
 }
 
 
@@ -477,6 +699,9 @@ template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear()
 {
     // TODO
+    while(root_ != NULL){
+        remove(root_);
+    }
 }
 
 
@@ -488,6 +713,17 @@ Node<Key, Value>*
 BinarySearchTree<Key, Value>::getSmallestNode() const
 {
     // TODO
+    /*
+    To retrieve smallest node
+    the left child will always be the smallest of the children
+    Keep traversing into the left child until you reach a left child with no more children
+        - This must be the smallest value, and also the "left-most" leaf
+    */
+   Node<Key, Value>* current_ = root_;
+   while(current_->getLeft() != NULL){
+    current_ = current_->getLeft();
+   }
+   return current_;
 }
 
 /**
@@ -499,6 +735,33 @@ template<typename Key, typename Value>
 Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) const
 {
     // TODO
+    /*
+    To find a node with a given key, traverse using the node.
+        - Is the key the same as the current node? 
+            - True?  i'm done
+            - False? need to traverse children
+        - Is the key larger than the current node?
+            - True? traverse rightward
+            - Else? Traverse leftward 
+                - (the key is smaller than the current node)
+                - All smaller children are left children 
+    
+    */
+
+    Node<Key, Value>* current_ = root_;
+    while(current_ != NULL){
+        if(current_->getKey() == key){
+            return current_;
+        }
+        else if(current_->getKey() < key){
+            current_= current_->getRight();
+        }
+        else if(current_->getKey() > key){
+            current_ = current_->getLeft();
+        }
+    }
+
+    return NULL;
 }
 
 /**
@@ -508,6 +771,18 @@ template<typename Key, typename Value>
 bool BinarySearchTree<Key, Value>::isBalanced() const
 {
     // TODO
+    /*
+    A BST is balanced IF at EVERY node in the tree
+        - The height difference between the left and right subtrees are no MORE than 1
+        - USED IN AVL AS WELL 
+            - Balance: Define b(n) as the balance of a node = Right – Left Subtree Height
+            - In this way, 
+            - If balance > -1, left height > right height, tree at node is left-heavy
+            - If balance > 1, right height > left height, tree at node is roght-heavy
+    */
+       // Add your code below
+
+    
 }
 
 
@@ -595,6 +870,91 @@ void BinarySearchTree<Key, Value>::nodeSwap( Node<Key,Value>* n1, Node<Key,Value
     }
 
 }
+
+// template<typename Key, typename Value>
+// bool BinarySearchTree<Key,Value>::checkBalance(Node<Key,Value>* Node_){
+//     /*
+//     here's maybe how i'd do it. In my main function, i'll first go ahead and call my helper function.
+//          This helper function would take an argument of a pointer to a node. 
+//          The helper function would internally would recurse and evaluate at each node and subtree and eventually return an int depth of the subtree with left or right child as the root/arg
+//     I would call the helper function twice, one for the left child of the root and the other for the right child of the root. Return depth of the main function where i would then assign the return values to two variabls to compare. 
+//     If the variables ==, 
+//         then return true, 
+//         if not, false
+//     */
+
+//     //trivially true if no tree
+//     if(Node_ == NULL){
+//         return true;
+//     }
+
+//     else if(Node_->getLeft() == NULL && Node_->getRight() == NULL){
+//         return true;
+//     }
+
+    
+
+//     int leftTree = 0;
+//     int rightTree = 0;
+
+
+
+//     //else if both exist, check the depths of both subtrees and compare depths
+//     leftTree = findDepth(Node_->getLeft());
+//     rightTree = findDepth(Node_->getRight());
+
+//     //compare the depths at right and left, return bool
+//     if(abs(rightTree-leftTree) <= 1){
+//         return true;
+//     }
+//     return false;
+//  }
+
+// template<typename Key, typename Value>
+// int BinarySearchTree<Key,Value>::findDepth(Node<Key,Value>* Node){
+//     int rightSubtree = 0;
+//     int leftSubtree = 0;
+
+
+//     //if no children at root (null), then return depth + 1 (meaning one node depth which is the root node itself)
+//     if(Node->getLeft() == NULL && Node->getRight() == NULL){
+//         return 1;
+//     }
+
+//     //else if children exist, recurse downward
+//     else{
+//         if(Node->getLeft() != NULL){
+//             leftSubtree = findDepth(Node->getLeft());
+//         }
+//         if(Node->getRight() != NULL){
+//             rightSubtree = findDepth(Node->getRight());
+//         }
+
+
+//     }   
+
+//     //while traversing from either right or left, if we detect a mismatch in depth early in a sub tree
+//     if(rightSubtree == -1 || leftSubtree == -1){
+//         return -1;
+//     }
+
+//     //traversing up one child
+//     if(rightSubtree == 0 && leftSubtree != 0){
+//         return leftSubtree+1;
+//     }
+//     if(rightSubtree != 0 && leftSubtree == 0){
+//         return rightSubtree+1;
+//     }
+    
+
+//     //traversing back up from both children
+//     if(rightSubtree == leftSubtree){
+//         return leftSubtree+1;
+//     }
+
+
+//     return -1;
+// }
 
 /**
  * Lastly, we are providing you with a print function,
