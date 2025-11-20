@@ -607,10 +607,6 @@ void BinarySearchTree<Key, Value>::remove(const Key& key)
         if(delNode->getRight() != NULL && delNode->getLeft() != NULL){
             Node<Key,Value>* predecessorNode = predecessor(delNode);
             nodeSwap(delNode, predecessorNode); //swap positions
-<<<<<<< HEAD
-=======
-            delNode = predecessorNode; //fix pointers
->>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
         }
 
         if(delNode->getRight() != NULL || delNode->getLeft() != NULL){
@@ -677,12 +673,9 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
         If the left subtree does not exist
             walk up parents until you find a node that is the right child to it's parent, the parent is the predecessor
     */
-<<<<<<< HEAD
     if (current == NULL) {
         return NULL;
     }
-=======
->>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
     Node<Key, Value>* parent = current->getParent();
     if(current->getLeft() != NULL){
         current = current->getLeft();
@@ -707,15 +700,9 @@ template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear()
 {
     // TODO
-<<<<<<< HEAD
     clearWithArg(root_);
     root_ = NULL;
     return;
-=======
-    while(root_ != NULL){
-        remove(root_->getKey());
-    }
->>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
 }
 
 template<typename Key, typename Value>
@@ -748,12 +735,9 @@ BinarySearchTree<Key, Value>::getSmallestNode() const
         - This must be the smallest value, and also the "left-most" leaf
     */
    Node<Key, Value>* current_ = root_;
-<<<<<<< HEAD
     if (current_ == NULL){
       return NULL;
     }
-=======
->>>>>>> 63a3d99e27d7ff565230887649e7426d1d2a2957
    while(current_->getLeft() != NULL){
     current_ = current_->getLeft();
    }
