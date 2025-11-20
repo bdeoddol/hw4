@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <utility>
 
+#include <algorithm>
+
 /**
  * A templated class for a Node in a search tree.
  * The getters for parent/left/right are virtual so
@@ -250,8 +252,8 @@ protected:
 
     // Add helper functions here
 
-    int findDepth(Node<Key,Value>* root);
-    bool checkBalance(Node<Key,Value>* Node_)
+    int calcDepth(Node<Key,Value>* current_) const;
+    void clearWithArg(Node<Key,Value>* current_);
 
 
 protected:
@@ -521,10 +523,8 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
 {
     // TODO
     //create a node to insert.
-    Node<Key, Value>* insertNode = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);  
-
     if(root_ == NULL){
-        root_ = insertNode;
+        root_ = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);
         return;
     }
     else{
@@ -537,8 +537,7 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
             foundParent = currChild;
             if(workingKey == foundParent->getKey()){
                 //update value
-                foundParent->setValue(insertNode->getValue());
-                delete insertNode;
+                foundParent->setValue(keyValuePair.second);
                 return;
             }
             else if(workingKey < foundParent->getKey()){
@@ -549,7 +548,7 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
             }
         }
     //now insert under the foundParent
-        
+        Node<Key, Value>* insertNode = new Node<Key,Value>(keyValuePair.first, keyValuePair.second, NULL);   
         if(workingKey > foundParent->getKey()){
             insertNode->setParent(foundParent);
             foundParent->setRight(insertNode);
@@ -608,7 +607,6 @@ void BinarySearchTree<Key, Value>::remove(const Key& key)
         if(delNode->getRight() != NULL && delNode->getLeft() != NULL){
             Node<Key,Value>* predecessorNode = predecessor(delNode);
             nodeSwap(delNode, predecessorNode); //swap positions
-            delNode = predecessorNode; //fix pointers
         }
 
         if(delNode->getRight() != NULL || delNode->getLeft() != NULL){
@@ -675,6 +673,9 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
         If the left subtree does not exist
             walk up parents until you find a node that is the right child to it's parent, the parent is the predecessor
     */
+    if (current == NULL) {
+        return NULL;
+    }
     Node<Key, Value>* parent = current->getParent();
     if(current->getLeft() != NULL){
         current = current->getLeft();
@@ -699,11 +700,25 @@ template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear()
 {
     // TODO
-    while(root_ != NULL){
-        remove(root_);
-    }
+    clearWithArg(root_);
+    root_ = NULL;
+    return;
 }
 
+template<typename Key, typename Value>
+void BinarySearchTree<Key,Value>::clearWithArg(Node<Key,Value>* current_){
+    if(current_ == NULL){
+        return;
+    }
+
+    //traverse downward thru the tree 
+    clearWithArg(current_->getLeft());
+    clearWithArg(current_->getRight());
+
+    
+    delete current_;
+    return;
+}
 
 /**
 * A helper function to find the smallest node in the tree.
@@ -720,6 +735,9 @@ BinarySearchTree<Key, Value>::getSmallestNode() const
         - This must be the smallest value, and also the "left-most" leaf
     */
    Node<Key, Value>* current_ = root_;
+    if (current_ == NULL){
+      return NULL;
+    }
    while(current_->getLeft() != NULL){
     current_ = current_->getLeft();
    }
@@ -779,12 +797,59 @@ bool BinarySearchTree<Key, Value>::isBalanced() const
             - In this way, 
             - If balance > -1, left height > right height, tree at node is left-heavy
             - If balance > 1, right height > left height, tree at node is roght-heavy
+
+            Implementation
+            Recurse down to all leaf nodes, and at each recursive call, call helper to check the heights of subtrees. 
+                - leaf nodes have no subtrees, therefore their heights = 1
+
     */
        // Add your code below
-
-    
+       
+    //calc depth only returns -1 IF unbalanced.
+    if(calcDepth(root_) == -1){
+      return false;
+    }
+    return true;
 }
 
+
+
+
+template<typename Key, typename Value>
+int BinarySearchTree<Key,Value>::calcDepth(Node<Key,Value>* current_) const{
+    //check the subtrees of the given node
+    int leftSubTree = 0;
+    int rightSubTree = 0;
+
+    if(current_ == NULL){
+        //no node given
+        return 0;
+    }
+
+    //check if one of the subtrees came back as BAD.
+    leftSubTree = calcDepth(current_->getLeft());
+    if(leftSubTree == -1){
+        return -1;
+    }
+    rightSubTree = calcDepth(current_->getRight());
+    if( rightSubTree == -1){
+       
+        return -1;
+    }
+
+    if(abs(rightSubTree - leftSubTree) > 1){
+        //calculate the difference, if exceed a difference of 1, return -1 to signal BAD(unbalanced) subtree.
+        return -1;
+    }
+
+    //by default, we want to return the greater of two subheights + 1 
+    //we calculate the difference earlier which if BALANCED shold always be less than 1
+    //we add one to include the node we are counting from 
+    if(leftSubTree > rightSubTree){
+      return leftSubTree + 1;
+    }
+    return 1 + rightSubTree;
+}
 
 
 template<typename Key, typename Value>
@@ -871,90 +936,7 @@ void BinarySearchTree<Key, Value>::nodeSwap( Node<Key,Value>* n1, Node<Key,Value
 
 }
 
-// template<typename Key, typename Value>
-// bool BinarySearchTree<Key,Value>::checkBalance(Node<Key,Value>* Node_){
-//     /*
-//     here's maybe how i'd do it. In my main function, i'll first go ahead and call my helper function.
-//          This helper function would take an argument of a pointer to a node. 
-//          The helper function would internally would recurse and evaluate at each node and subtree and eventually return an int depth of the subtree with left or right child as the root/arg
-//     I would call the helper function twice, one for the left child of the root and the other for the right child of the root. Return depth of the main function where i would then assign the return values to two variabls to compare. 
-//     If the variables ==, 
-//         then return true, 
-//         if not, false
-//     */
 
-//     //trivially true if no tree
-//     if(Node_ == NULL){
-//         return true;
-//     }
-
-//     else if(Node_->getLeft() == NULL && Node_->getRight() == NULL){
-//         return true;
-//     }
-
-    
-
-//     int leftTree = 0;
-//     int rightTree = 0;
-
-
-
-//     //else if both exist, check the depths of both subtrees and compare depths
-//     leftTree = findDepth(Node_->getLeft());
-//     rightTree = findDepth(Node_->getRight());
-
-//     //compare the depths at right and left, return bool
-//     if(abs(rightTree-leftTree) <= 1){
-//         return true;
-//     }
-//     return false;
-//  }
-
-// template<typename Key, typename Value>
-// int BinarySearchTree<Key,Value>::findDepth(Node<Key,Value>* Node){
-//     int rightSubtree = 0;
-//     int leftSubtree = 0;
-
-
-//     //if no children at root (null), then return depth + 1 (meaning one node depth which is the root node itself)
-//     if(Node->getLeft() == NULL && Node->getRight() == NULL){
-//         return 1;
-//     }
-
-//     //else if children exist, recurse downward
-//     else{
-//         if(Node->getLeft() != NULL){
-//             leftSubtree = findDepth(Node->getLeft());
-//         }
-//         if(Node->getRight() != NULL){
-//             rightSubtree = findDepth(Node->getRight());
-//         }
-
-
-//     }   
-
-//     //while traversing from either right or left, if we detect a mismatch in depth early in a sub tree
-//     if(rightSubtree == -1 || leftSubtree == -1){
-//         return -1;
-//     }
-
-//     //traversing up one child
-//     if(rightSubtree == 0 && leftSubtree != 0){
-//         return leftSubtree+1;
-//     }
-//     if(rightSubtree != 0 && leftSubtree == 0){
-//         return rightSubtree+1;
-//     }
-    
-
-//     //traversing back up from both children
-//     if(rightSubtree == leftSubtree){
-//         return leftSubtree+1;
-//     }
-
-
-//     return -1;
-// }
 
 /**
  * Lastly, we are providing you with a print function,
