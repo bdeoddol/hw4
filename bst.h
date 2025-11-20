@@ -439,7 +439,7 @@ BinarySearchTree<Key, Value>::~BinarySearchTree()
 
 
 
-    
+    clear();
 }
 
 /**
@@ -538,6 +538,7 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
             if(workingKey == foundParent->getKey()){
                 //update value
                 foundParent->setValue(keyValuePair.second);
+
                 return;
             }
             else if(workingKey < foundParent->getKey()){
