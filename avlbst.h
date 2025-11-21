@@ -531,13 +531,13 @@ void AVLTree<Key, Value>::removeFix(AVLNode<Key, Value>* delNode, int diff)
         return;
     } 
 
-    else if (node->getBalance() + diff == 1) {
+    else if (delNode->getBalance() + diff == 1) {
         delNode->setBalance(1);
 
         return;
     } 
 
-    else if (node->getBalance() + diff == 0) {
+    else if (delNode->getBalance() + diff == 0) {
         //make sure that the rest of the tree isn't unbalanced above bc the height is -1 now since it's a perfect rotate
         delNode->setBalance(0);
         removeFix(parent, newDiff);
