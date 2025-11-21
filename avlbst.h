@@ -160,7 +160,6 @@ template<class Key, class Value>
 void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
 {
     // TODO
-     // TODO
     //create a node to insert.
     if(root_ == NULL){
         root_ = new AVLNode<Key,Value>(new_item.first, new_item.second, NULL);
@@ -341,7 +340,6 @@ template<class Key, class Value>
 void AVLTree<Key, Value>:: remove(const Key& key)
 {
     // TODO
-      // TODO
     AVLNode<Key, Value>* delNode = root_;
 
     if(root_ == NULL){
