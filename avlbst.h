@@ -385,7 +385,14 @@ void AVLTree<Key, Value>:: remove(const Key& key)
     AVLNode<Key,Value>* delNode = static_cast<AVLNode<Key, Value>*>(BinarySearchTree<Key,Value>::internalFind(key));
     //traverse nodes to find the correct key
     if(delNode == NULL){
-        return;
+        return; 
+
+    }
+
+    if(delNode->getLeft() != NULL && delNode->getRight() != NULL){
+       AVLNode<Key,Value>* predecessorNode = predecessor(delNode);
+        nodeSwap(delNode, predecessorNode); //swap positions
+
     }
 
     AVLNode<Key, Value>* parentdelNode = delNode->getParent();
@@ -409,20 +416,7 @@ void AVLTree<Key, Value>:: remove(const Key& key)
         If one of them exist, then we need to find out which of them exists and swap with them. 
         If neither exist, delete
     */
-    if(delNode->getRight() != NULL && delNode->getLeft() != NULL){
-        AVLNode<Key,Value>* predecessorNode = predecessor(delNode);
-        nodeSwap(delNode, predecessorNode); //swap positions
 
-        if(parentdelNode != NULL){
-            if(parentdelNode->getLeft() == delNode){
-                diff = 1;
-
-            }
-            else{
-                diff = -1;
-            }
-        }
-    }
 
     if(delNode->getRight() != NULL || delNode->getLeft() != NULL){
         //after swapping with the predecessor, it's guaranteed that the delNode will have 0 or 1 child
