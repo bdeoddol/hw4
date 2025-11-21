@@ -802,7 +802,6 @@ bool BinarySearchTree<Key, Value>::isBalanced() const
             Implementation
             Recurse down to all leaf nodes, and at each recursive call, call helper to check the heights of subtrees. 
                 - leaf nodes have no subtrees, therefore their heights = 1
-
     */
        // Add your code below
        
